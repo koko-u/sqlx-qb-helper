@@ -1,18 +1,18 @@
 /// QueryBuilder adapter for adding where clauses
-pub struct Where<'q, 'args, DB>
+pub struct Where<'q, DB>
 where
     DB: sqlx::Database,
 {
-    query: &'q mut sqlx::QueryBuilder<'args, DB>,
+    query: &'q mut sqlx::QueryBuilder<DB>,
     has_condition: bool,
 }
 
-impl<'q, 'args, DB> Where<'q, 'args, DB>
+impl<'q, DB> Where<'q, DB>
 where
     DB: sqlx::Database,
 {
     /// create where adapter from QueryBuilder
-    pub fn new(query: &'q mut sqlx::QueryBuilder<'args, DB>) -> Self {
+    pub fn new(query: &'q mut sqlx::QueryBuilder<DB>) -> Self {
         Self {
             query,
             has_condition: false,
@@ -28,7 +28,7 @@ where
     ///       .push_bind(&name);
     /// );
     /// ```
-    pub fn and(&mut self, f: impl FnOnce(&mut sqlx::QueryBuilder<'args, DB>)) -> &mut Self {
+    pub fn and(&mut self, f: impl FnOnce(&mut sqlx::QueryBuilder<DB>)) -> &mut Self {
         if self.has_condition {
             self.query.push(" AND ");
         } else {
@@ -49,11 +49,7 @@ where
     ///     qb.push(r#" "brand_name" = "#).push_bind(&brand_name);
     /// });
     /// ```
-    pub fn and_if(
-        &mut self,
-        condition: bool,
-        f: impl FnOnce(&mut sqlx::QueryBuilder<'args, DB>),
-    ) -> &mut Self {
+    pub fn and_if(&mut self, condition: bool, f: impl FnOnce(&mut sqlx::QueryBuilder<DB>)) -> &mut Self {
         if condition {
             self.and(f);
         }
@@ -65,7 +61,7 @@ where
     pub fn and_opt<T>(
         &mut self,
         value: Option<T>,
-        f: impl FnOnce(&mut sqlx::QueryBuilder<'args, DB>, T),
+        f: impl FnOnce(&mut sqlx::QueryBuilder<DB>, T),
     ) -> &mut Self {
         if let Some(value) = value {
             self.and(|query| f(query, value));

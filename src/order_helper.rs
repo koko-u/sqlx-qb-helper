@@ -1,23 +1,23 @@
-pub struct OrderBy<'q, 'args, DB>
+pub struct OrderBy<'q, DB>
 where
     DB: sqlx::Database,
 {
-    query: &'q mut sqlx::QueryBuilder<'args, DB>,
+    query: &'q mut sqlx::QueryBuilder<DB>,
     has_order: bool,
 }
 
-impl<'q, 'args, DB> OrderBy<'q, 'args, DB>
+impl<'q, DB> OrderBy<'q, DB>
 where
     DB: sqlx::Database,
 {
-    pub fn new(query: &'q mut sqlx::QueryBuilder<'args, DB>) -> Self {
+    pub fn new(query: &'q mut sqlx::QueryBuilder<DB>) -> Self {
         Self {
             query,
             has_order: false,
         }
     }
 
-    pub fn push(&mut self, f: impl FnOnce(&mut sqlx::QueryBuilder<'args, DB>)) -> &mut Self {
+    pub fn push(&mut self, f: impl FnOnce(&mut sqlx::QueryBuilder<DB>)) -> &mut Self {
         if self.has_order {
             self.query.push(", ");
         } else {
@@ -30,11 +30,7 @@ where
         self
     }
 
-    pub fn push_if(
-        &mut self,
-        condition: bool,
-        f: impl FnOnce(&mut sqlx::QueryBuilder<'args, DB>),
-    ) -> &mut Self {
+    pub fn push_if(&mut self, condition: bool, f: impl FnOnce(&mut sqlx::QueryBuilder<DB>)) -> &mut Self {
         if condition {
             self.push(f);
         }
